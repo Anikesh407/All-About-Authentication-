@@ -38,7 +38,15 @@ export const registerUser = TryCatch(async (req, res) => {
   }
   const { name, email, password } = validation.data;
 
-  const rateLimitkey = `register-rate-limit:${req.ip}:${email}`;
+  const rateLimitKey = `register-rate-limit:${req.ip}:${email}`;
+
+  const isRateLimited = await redisClient.get(rateLimitKey);
+
+  if (isRateLimited) {
+    return res.status(429).json({
+      message: "Too many requests. Please try again after 1 minute."
+    });
+  }
 
   const existUser = await User.findOne({ email });
   if (existUser) {
@@ -65,7 +73,7 @@ export const registerUser = TryCatch(async (req, res) => {
   const html = getVerifyEmailHtml({ email, verifyToken });
   await sendMail({ email, subject, html });
 
-  await redisClient.set(rateLimitkey, "true", { EX: 60 });
+  await redisClient.set(rateLimitKey, "true", { EX: 60 });
 
   res.json({
     message: "If your email is valid ,a verification link has been sent.it is only valid for 5 minutes"
