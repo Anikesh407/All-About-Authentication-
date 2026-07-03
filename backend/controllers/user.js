@@ -13,7 +13,7 @@ export const registerUser = TryCatch(async (req, res) => {
   const sanitizedBody = sanitize(req.body);
   const validation = registerSchema.safeParse(sanitizedBody);
 
-  console.log(validation);
+ 
 
 
   if (!validation.success) {
