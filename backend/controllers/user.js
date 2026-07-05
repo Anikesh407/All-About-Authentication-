@@ -76,6 +76,6 @@ export const registerUser = TryCatch(async (req, res) => {
   await redisClient.set(rateLimitKey, "true", { EX: 60 });
 
   res.json({
-    message: "If your email is valid ,a verification link has been sent.it is only valid for 5 minutes"
+    message: "If your email is valid ,a verification link has been sent.It is only valid for 5 minutes."
   })
 })
