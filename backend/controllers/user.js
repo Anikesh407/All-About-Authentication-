@@ -59,7 +59,8 @@ export const registerUser = TryCatch(async (req, res) => {
 
   const verifyToken = crypto.randomBytes(32).toString("hex");
 
-  const verifyKey = `verify:${verifyToken}`
+  const verifyKey = `verify:${verifyToken}`;
+ 
 
   const datatoStore = JSON.stringify({
     name,
@@ -70,7 +71,8 @@ export const registerUser = TryCatch(async (req, res) => {
   await redisClient.set(verifyKey, datatoStore, { EX: 300 });
 
   const subject = "Verify Your Email For Account Creation";
-  const html = getVerifyEmailHtml({ email, verifyToken });
+  
+  const html = getVerifyEmailHtml({ email, verifyToken});
   await sendMail({ email, subject, html });
 
   await redisClient.set(rateLimitKey, "true", { EX: 60 });
@@ -78,4 +80,51 @@ export const registerUser = TryCatch(async (req, res) => {
   res.json({
     message: "If your email is valid ,a verification link has been sent.It is only valid for 5 minutes."
   })
+});
+
+export const verifyUser=TryCatch(async(req,res)=>{
+  const {token}=req.params;
+  if(!token){
+    return res.status(400).json({
+      message:"Verification token is required"
+    });
+  }
+
+ const verifyKey=`verify:${token}`;
+ const userDatajson=await redisClient.get(verifyKey);
+
+ if(!userDatajson){
+  return res.status(400).json({
+    message:"Verification link is expired",
+  })
+ }
+
+ await redisClient.del(verifyKey);
+ const userData=JSON.parse(userDatajson);
+
+ const existingUser=await User.findOne({email:userData.email});
+ if(existingUser){
+  return res.status(400).json(
+    {
+      message:"User already exists"
+    }
+  )
+ }
+
+ const newUser=await User.create({
+  name:userData.name,
+  email:userData.email,
+  password:userData.password
+ })
+
+ res.status(201).json({
+  message:"Email verified Successfully! Your account has been created",
+  user:{
+    _id:newUser._id,
+    name:newUser.name,
+    email:newUser.email
+
+  }
+ })
+  
 })

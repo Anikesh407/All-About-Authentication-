@@ -1,5 +1,5 @@
 export const getOtpHtml = ({ email, otp }) => {
-const html = `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -185,19 +185,22 @@ Use the verification code below to complete your sign-in to Authentication App.
 </body>
 </html>
 `;
-return html;
+  return html;
 };
-export const getVerifyEmailHtml = ({ email, token }) => {
-const appName = process.env.APP_NAME || "Authentication App";
-const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-const verifyUrl = `${baseUrl.replace(/\/+$/, "")}/token/${encodeURIComponent(
-token
+export const getVerifyEmailHtml = ({ email, verifyToken }) => {
+  const token = verifyToken;
+  const appName = process.env.APP_NAME || "Authentication App";
+  const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const verifyUrl = `${baseUrl.replace(/\/+$/, "")}/token/${encodeURIComponent(
+    token
 
-)}`;
-//http://localhost:5173/token/sdakfjoaifsledsnqyia
+  )}`;
+  console.log(verifyUrl);
+
+  //http://localhost:5173/token/sdakfjoaifsledsnqyia
 
 
-const html = `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -356,5 +359,5 @@ If this wasn’t you, you can safely ignore this email.
 </table>
 </body>
 </html>`;
-return html;
+  return html;
 }
